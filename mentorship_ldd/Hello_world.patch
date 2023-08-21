@@ -1,0 +1,52 @@
+diff --git a/LDD/hello_world/Makefile b/LDD/hello_world/Makefile
+new file mode 100644
+index 0000000..d25b507
+--- /dev/null
++++ b/LDD/hello_world/Makefile
+@@ -0,0 +1,19 @@
++obj-m := hellomain.o
++
++
++KERNEL_DIR=/home/atom-pi/astudy/kernel/linux
++
++KERNEL_DIR_HOST=/lib/modules/6.1.45-v8-VarunPyasi+/build
++
++
++all:
++	make -C $(KERNEL_DIR) M=$(PWD) modules
++
++clean:
++	make -C $(KERNEL_DIR) M=$(PWD) clean
++
++help:
++	make -C $(KERNEL_DIR) M=$(PWD) help
++
++host:
++	make -C $(KERNEL_DIR_HOST) M=$(PWD) modules
+diff --git a/LDD/hello_world/hellomain.c b/LDD/hello_world/hellomain.c
+new file mode 100644
+index 0000000..79c33a7
+--- /dev/null
++++ b/LDD/hello_world/hellomain.c
+@@ -0,0 +1,21 @@
++#include<linux/module.h>
++
++
++static int __init atom_init(void)
++{
++	pr_info("Module init successful\n");
++
++	return 0;
++}
++
++static void __exit atom_fini(void)
++{
++	pr_info("Module deinit\n");
++}
++
++module_init(atom_init);
++module_exit(atom_fini);
++
++MODULE_LICENSE("GPL");
++MODULE_DESCRIPTION("First module project");
++MODULE_AUTHOR("VARUN PYASI");
