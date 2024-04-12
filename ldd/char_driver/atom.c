@@ -2,9 +2,9 @@
 #include<linux/fs.h>
 #include<linux/cdev.h>
 #include<linux/device.h>
+#include<linux/uaccess.h>
 
-
-#define DEV_MEM_SIZE 512
+#define DEV_MEM_SIZE 1024
 
 #undef pr_fmt
 #define pr_fmt(fmt) "%s :" fmt,__func__ 
@@ -18,22 +18,103 @@ dev_t device_number;
 /* CDEV variable */
 struct cdev atom_cdev;
 
-loff_t atom_llseek (struct file *filp, loff_t off, int shence)
+loff_t atom_llseek (struct file *filp, loff_t off, int whence)
 {
+	loff_t temp;
+
 	pr_info("llseek requested\n");
-	return 0;
+	pr_info("Current value of the file position = %lld\n",filp->f_pos);
+
+	switch(whence)
+	{
+		case SEEK_SET:
+			if((off > DEV_MEM_SIZE) || (off < 0))
+				return -EINVAL;
+			filp->f_pos = off;
+			break;
+		case SEEK_CUR:
+			temp = filp->f_pos + off;
+			if((temp > DEV_MEM_SIZE) || (temp < 0))
+				return -EINVAL;
+			filp->f_pos = temp;
+			break;
+		case SEEK_END:
+			temp = DEV_MEM_SIZE + off;
+			if((temp > DEV_MEM_SIZE) || (temp < 0))
+				return -EINVAL;
+			filp->f_pos = temp;
+			break;
+		default:
+			return -EINVAL;
+	}
+
+	pr_info("New value of the file position = %lld\n",filp->f_pos);
+
+	return filp->f_pos;
 }
 
 ssize_t atom_read (struct file *flip, char __user *buff, size_t count, loff_t *off)
 {
 	pr_info("Read requested for %zu count\n",count);
-	return 0;
+
+	pr_info("Current file position = %lld\n",*off);
+
+	/* Adjust the count */
+	if((*off + count) > DEV_MEM_SIZE)
+	{
+		count = DEV_MEM_SIZE - *off;
+	}
+
+	/* Copy to user */
+
+	if(copy_to_user(buff, &device_buffer[*off], count))
+	{
+		return -EFAULT;
+	}
+
+	/* Update the current file postion */
+	*off += count;
+
+	pr_info("Number of bytes successfully read = %zu\n", count);
+	pr_info("Updated file position = %lld\n",*off);
+
+	/* Return number of bytes */
+	return count;
 }
 
 ssize_t atom_write (struct file *flip, const char __user *buff, size_t count, loff_t *off)
 {
 	pr_info("Write requested for %zu count\n",count);
-	return 0;
+
+	pr_info("Current file position = %lld\n",*off);
+
+	/* Adjust the count */
+	if((*off + count) > DEV_MEM_SIZE)
+	{
+		count = DEV_MEM_SIZE - *off;
+	}
+
+	if(!count)
+	{
+		pr_err("No space left on the device.\n");
+		return -ENOMEM;
+	}
+
+	/* Copy from user */
+
+	if(copy_from_user(&device_buffer[*off], buff, count))
+	{
+		return -EFAULT;
+	}
+
+	/* Update the current file postion */
+	*off += count;
+
+	pr_info("Number of bytes successfully written = %zu\n", count);
+	pr_info("Updated file position = %lld\n",*off);
+
+	/* Return number of bytes */
+	return count;
 }
 
 int atom_open (struct inode *inode, struct file *flip)
