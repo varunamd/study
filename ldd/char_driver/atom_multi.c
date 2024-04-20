@@ -163,7 +163,7 @@ static int __init atom_init(void)
 	cdev_add(&atom_cdev, device_number, 1);
 
 	/* Create device class under /sys/class/ */
-	class_atom = class_create(THIS_MODULE, "atom_class");
+	class_atom = class_create("atom_class");
 
 	/* Populate the sysfs with device information */
 	device_atom = device_create(class_atom, NULL, device_number, NULL, "atom");

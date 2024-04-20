@@ -1,13 +1,8 @@
-obj-m := hellomain.o
+obj-m := atom.o atom_multi.o
 
+KERNEL_DIR=/lib/modules/$(shell uname -r)/build 
 
-KERNEL_DIR=/home/atom-pi/astudy/kernel/linux
-
-KERNEL_DIR_HOST=/lib/modules/6.1.45-v8-VarunPyasi+/build
-
-
-all:
-	make -C $(KERNEL_DIR) M=$(PWD) modules
+all: host
 
 clean:
 	make -C $(KERNEL_DIR) M=$(PWD) clean
@@ -16,4 +11,4 @@ help:
 	make -C $(KERNEL_DIR) M=$(PWD) help
 
 host:
-	make -C $(KERNEL_DIR_HOST) M=$(PWD) modules
+	make -C $(KERNEL_DIR) M=$(PWD) modules
