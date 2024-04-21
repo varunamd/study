@@ -1,4 +1,4 @@
-obj-m := atom.o atom_multi.o
+obj-m := hellomain.o
 
 KERNEL_DIR=/lib/modules/$(shell uname -r)/build 
 

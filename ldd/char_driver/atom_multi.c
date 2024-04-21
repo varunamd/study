@@ -10,7 +10,10 @@
 #define pr_fmt(fmt) "%s :" fmt,__func__ 
 
 /* ATOM device's memory */
-char device_buffer[DEV_MEM_SIZE];
+char device_buffer1[DEV_MEM_SIZE];
+char device_buffer2[DEV_MEM_SIZE];
+char device_buffer3[DEV_MEM_SIZE];
+char device_buffer4[DEV_MEM_SIZE];
 
 /* This holds the device number */
 dev_t device_number;
@@ -67,7 +70,7 @@ ssize_t atom_read (struct file *flip, char __user *buff, size_t count, loff_t *o
 
 	/* Copy to user */
 
-	if(copy_to_user(buff, &device_buffer[*off], count))
+	if(copy_to_user(buff, &device_buffer1[*off], count))
 	{
 		return -EFAULT;
 	}
@@ -102,7 +105,7 @@ ssize_t atom_write (struct file *flip, const char __user *buff, size_t count, lo
 
 	/* Copy from user */
 
-	if(copy_from_user(&device_buffer[*off], buff, count))
+	if(copy_from_user(&device_buffer1[*off], buff, count))
 	{
 		return -EFAULT;
 	}
