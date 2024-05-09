@@ -1,6 +1,6 @@
 #/bin/sh
 
-
+cd ../../linux
 export KERNEL=kernel_2712
 make bcm2712_defconfig
 
