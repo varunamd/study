@@ -1,0 +1,47 @@
+Raspberry PI 4 with FreeRTOS
+
+Steps to enter u-boot prompt:
+1.	ssh amd@mpmusb (Linux host where RASPI is connected)
+2.	sudo minicom -b 115200 -D /dev/ttyUSB0 (u-boot prompt)
+3.	sudo minicom -b 115200 -D /dev/ttyUSB1 (FreeRTOS/Uart prints)
+
+Booting methods:
+1.	SD card boot
+2.	TFTP boot
+
+SD card boot:
+-	copy uart.elf into SD card (sudo cp uart.elf /media/amd/bootfs)
+-	unplug and plugin the power cable
+-	setenv autostart yes
+-	dcache off
+-	fatload mmc 0:1 0x28000000 uart.elf
+-	dcache flush
+-	bootelf 0x28000000
+
+TFTP boot:
+-	copy uart.elf into TFTP server directory i.e. mpmusb machine for us.
+(sudo cp uart.elf /srv/tftp)
+-	on u-boot prompt: go 0x0.
+-	setenv autostart yes
+-	dcache off
+-	tftpboot 0x28000000 uart.elf
+-	dcache flush
+-	bootelf 0x28000000
+
+Boot kernel8.img:
+- setenv bootcmd 'fatload mmc 0:1 ${kernel_addr_r} ${kernel_image}; fatload mmc 0:1 ${fdt_addr_r} ${fdtfile}; booti ${kernel_addr_r} - ${fdt_addr_r}'
+- setenv kernel_image kernel8.img
+- setenv fdtfile bcm2711-rpi-4-b.dtb
+- setenv kernel_comp_size 0x1c000000
+- setenv kernel_comp_addr_r 0x08000000
+- setenv bootargs '8250.nr_uarts=1 console=ttyS0,115200 root=/dev/mmcblk0p2 rootfstype=ext4 rw rootdelay=10 panic=5'
+- run bootcmd
+
+Debugging mechanism:
+1.	Enable variable trace_buff in code with volatile keyword.
+2.	Disable the cache and find the address in uart.sym.
+3.	Stop the code at while(trace_buff[0] == 0xAA). When we give other than AA in memory, it will proceed.
+4.	Read virtual memory like 0x2000f020. md 0x2000f020
+5.	Write 0xAB, it will go beyond. mw 2000f020 AB
+6.	md 2000f020, data will be updated.
+7.	dcache flush - prints will move forward.
