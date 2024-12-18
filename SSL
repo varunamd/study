@@ -1,0 +1,11 @@
+SSLKEYLOGFILE=<path>
+
+
+SSLKEYLOGFILE :
+Step 1: 
+In the Environmental Variables pop-up window, under User variables, select New.
+For Variable name, enter the following name:
+NAME: SSLKEYLOGFILE
+Value: path with filename.
+
+Step 2: Run this command in cmd[admin mode] "setx SSLKEYLOGFILE <full path with filename>.log"
